@@ -22,7 +22,7 @@ def open_read_csv_file(file_to_read_in):
     file_obj.seek(0)
     csv_object = csv.reader(file_obj, dialect=dialect)
     csv_object_header = next(csv_object)
-    return csv_object_header, csv_object
+    return csv_object
 
 def create_dictionary_object(csv_object) -> dict:
     dictionary_object = {}

@@ -1,31 +1,40 @@
 import glob
 import seaborn as sns
 import pandas as pd
+from read_csv_and_get_dict import *
 import matplotlib.pyplot as plt
 
 from nltk.corpus import stopwords
 from collections import  Counter
 
-def plot_top_non_stopwords_barchart(fileName, text):
+
+
+def plot_top_non_stopwords_barchart(file_name, text_dict):
     stop=set(stopwords.words('english'))
-    
-    new= text.str.split()
-    new=new.values.tolist()
-    corpus=[word for i in new for word in i]
 
-    counter=Counter(corpus)
-    most=counter.most_common()
-    x, y=[], []
-    for word,count in most[:40]:
-        if (word not in stop):
-            x.append(word)
-            y.append(count)
+    for date, text in text_dict.items():
+        joined_dict_text = " "
+        joined_dict_text = joined_dict_text.join(text)
+        new = joined_dict_text.split()
+        #new = new.values.tolist()
+        #corpus = [word for i in new for word in i]
+        counter = Counter(new)#corpus)
+        most = counter.most_common()
+        x, y = [], []
+        #print(most[:40])
+        #if (most[0] not in stop):
+        #    x.append(most[0])
+        #    y.append(date)
+        for word,count in most[:40]:
+            if (word not in stop):
+                x.append(word)
+                y.append(count)
 
-    ax = sns.barplot(x=y,y=x).set_title('COVID-19 Keyword Frequency over Time')
+    ax = sns.barplot(x = y, y = x).set_title('COVID-19 Keyword Frequency over Time')
     plt.show()
     fig = ax.get_figure()
-    print(fileName)
-    fig.savefig(fileName[:-len('.csv')] + '_graph.png')
+    print(file_name)
+    fig.savefig(file_name[:-len('.csv')] + '_graph.png')
 
 def find_keyword_files(file_name):
     file_list = []
@@ -36,10 +45,12 @@ def find_keyword_files(file_name):
 def turn_keywords_into_graph():
     file_list = find_keyword_files('*_nlp_keywords.csv')
     for file in file_list:
-        nlp_keyword_csv = pd.read_csv(file)
-        nlp_keyword_csv.values.tolist()
-       # for row in nlp_keyword_csv:
-        plot_top_non_stopwords_barchart(file, nlp_keyword_csv['Keywords'])
+        keyword_dict = create_dictionary_object(open_read_csv_file(file))
+        #nlp_keyword_csv = pd.read_csv(file)
+        #nlp_keyword_csv.values.tolist()
+        #print(nlp_keyword_csv)
+        #for row in nlp_keyword_csv:
+        plot_top_non_stopwords_barchart(file, keyword_dict)#['Keywords'])
     
 def main():
     turn_keywords_into_graph()
