@@ -18,15 +18,14 @@ def append_value(dict_obj, key, value):
 
 def open_read_csv_file(file_to_read_in):
     file_obj = open(file_to_read_in, 'r', newline='')
-    dialect = csv.Sniffer().sniff(file_obj.read())
-    file_obj.seek(0)
-    csv_object = csv.reader(file_obj, dialect=dialect)
+    csv_object = csv.reader(file_obj)
     csv_object_header = next(csv_object)
     return csv_object
 
 def create_dictionary_object(csv_object) -> dict:
     dictionary_object = {}
     for row in csv_object:
+        print(row[0])
         key = row[0]
         row = row[1:]
         for data in row:
