@@ -25,7 +25,6 @@ def open_read_csv_file(file_to_read_in):
 def create_dictionary_object(csv_object) -> dict:
     dictionary_object = {}
     for row in csv_object:
-        print(row[0])
         key = row[0]
         row = row[1:]
         for data in row:
