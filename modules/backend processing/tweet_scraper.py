@@ -8,7 +8,7 @@ import pandas as pd
 
 path = 'tweets'
 if not os.path.exists(path):
-    pathos.mkdir(path)
+    os.mkdir(path)
 
 def calculate_days_in_month(month, year):
     return calendar.monthrange(year, month)[1]
@@ -42,7 +42,7 @@ def get_file_name_string(keyword, end_date):
     return str(keyword + '_' + str(end_date[-10:-8]) + '-' + str(end_date[-7:-5]) +\
                '-' + str(end_date[-2:]) + '.csv')
 
-def tweet_scraper(start_date, end_date, keyword):
+def tweet_scraper(number_of_tweets_per_month, start_date, end_date, keyword):
     # Using TwitterSearchScraper to scrape data and append tweets to list
     months = calculate_number_of_months(start_date, end_date)
     final_date = end_date
@@ -54,7 +54,7 @@ def tweet_scraper(start_date, end_date, keyword):
         else:
             end_date = final_date
         for i,tweet in enumerate(sntwitter.TwitterSearchScraper(get_twitter_search_string(keyword, start_date, end_date)).get_items()):
-            if i>1:
+            if i>number_of_tweets_per_month:
                 break
             tweets_list2.append([tweet.date, tweet.id, tweet.content])
         # Creating a dataframe from the tweets list above
@@ -67,7 +67,8 @@ def main():
     start_date = '01-01-2020'
     end_date = '05-24-2021'
     keyword = 'coronavirus'
-    tweet_scraper(start_date, end_date, keyword)
+    number_of_tweets_per_month = 1000
+    tweet_scraper(number_of_tweets_per_month, start_date, end_date, keyword)
 
 if __name__ == '__main__':
     main()

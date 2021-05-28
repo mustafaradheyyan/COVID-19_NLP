@@ -6,9 +6,9 @@ keywords_path = 'nlp_keywords'
 sentiments_path = 'nlp_sentiments'
 
 if not os.path.exists(keywords_path):
-    pathos.mkdir(keywords_path)
+    os.mkdir(keywords_path)
 if not os.path.exists(sentiments_path):
-    pathos.mkdir(sentiments_path)
+    os.mkdir(sentiments_path)
 
 def is_number(price_value):
     try:
