@@ -53,8 +53,9 @@ def tweet_scraper(number_of_tweets_per_month, start_date, end_date, keyword):
             end_date = calculate_end_date(start_date, end_date)
         else:
             end_date = final_date
-        for i,tweet in enumerate(sntwitter.TwitterSearchScraper(get_twitter_search_string(keyword, start_date, end_date)).get_items()):
-            if i>number_of_tweets_per_month:
+        for i, tweet in enumerate(sntwitter.TwitterSearchScraper\
+                    (get_twitter_search_string(keyword, start_date, end_date)).get_items()):
+            if i > number_of_tweets_per_month:
                 break
             tweets_list2.append([tweet.date, tweet.id, tweet.content])
         # Creating a dataframe from the tweets list above
