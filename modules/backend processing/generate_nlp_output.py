@@ -1,7 +1,4 @@
-import json
 import csv
-import ast
-import pandas as pd
 from ibm_watson import NaturalLanguageUnderstandingV1
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 from ibm_watson.natural_language_understanding_v1 import Features, KeywordsOptions, SentimentOptions
@@ -64,5 +61,3 @@ def write_url_results_to_file(file_name, pub_nlp_list):
         writer.writeheader()
         for item in pub_nlp_list:
             csv_file.write("%s\n" % item)
-    
-

@@ -25,17 +25,9 @@ def open_read_csv_file(file_to_read_in):
 def create_dictionary_object(csv_object) -> dict:
     dictionary_object = {}
     for row in csv_object:
-        print(row[0])
         key = row[0]
         row = row[1:]
         for data in row:
             if not data == '':
                 append_value(dictionary_object, key, data)
     return dictionary_object
-
-def main():
-    pub_csv_header, pub_csv = open_read_csv_file('CSVs/health_publication_information_test.csv')
-    pub_url_dictionary = create_dictionary_object(pub_csv)
-
-if __name__ == '__main__':
-  main()

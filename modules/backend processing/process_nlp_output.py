@@ -2,6 +2,14 @@ import numpy as np
 import generate_nlp_output as nlp
 from read_csv_and_get_dict import *
 
+keywords_path = 'nlp_keywords'
+sentiments_path = 'nlp_sentiments'
+
+if not os.path.exists(keywords_path):
+    os.mkdir(keywords_path)
+if not os.path.exists(sentiments_path):
+    os.mkdir(sentiments_path)
+
 def is_number(price_value):
     try:
         price = float(price_value)
@@ -69,5 +77,7 @@ def sort_nlp_output(nlp_file_names, nlp_type):
 def get_nlp_keywords_and_sentiment_to_file(nlp_dictionary, nlp_type):
     nlp_file_names = nlp.generate_nlp_output(nlp_dictionary, nlp_type[-4:])
     keyword_dic, sentiment_dic = sort_nlp_output(nlp_file_names, nlp_type[-4:])
-    write_to_file(keyword_dic, nlp_type[:-5] + '_nlp_keywords.csv', ['Date', 'Keywords'])
-    write_to_file(sentiment_dic, nlp_type[:-5] + '_nlp_sentiments.csv', ['Date', 'Sentiment'])
+    write_to_file(keyword_dic, os.path.join(keywords_path, nlp_type[:-5] + '_nlp_keywords.csv'),\
+                                                                          ['Date', 'Keywords'])
+    write_to_file(sentiment_dic, os.path.join(sentiments_path, nlp_type[:-5] + '_nlp_sentiments.csv'),\
+                                                                          ['Date', 'Sentiment'])
