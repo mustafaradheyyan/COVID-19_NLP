@@ -1,12 +1,9 @@
 import sys
 sys.path.insert(0, 'backend processing')
-sys.path.insert(0, 'frontend gui')
 from health_pub_scraper import *
-from tweet_scraper import *
 from tweet_to_dict import *
 from process_nlp_output import *
 import keywords_into_graph as kgr
-from user_input_gui import *
 import tkinter as tk
 
 fields = 'Search Term', 'Start Date (mm-dd-yyyy)', 'End Date  (mm-dd-yyyy)',\
@@ -14,18 +11,16 @@ fields = 'Search Term', 'Start Date (mm-dd-yyyy)', 'End Date  (mm-dd-yyyy)',\
 text_list = 'COVID-19', "01-12-2020", '05-24-2021', 2, 1
 
 def fetch(entries):
+    # Getting user input from text entries in GUI window, defaults are set
     search_term = entries[0][1].get()
     start_date = entries[1][1].get()
     end_date = entries[2][1].get()
     pubs_per_month = float(entries[3][1].get())
     tweets_per_month = float(entries[4][1].get())
-     # Reading health pub csv file and creating dictionary object
+
+    # Reading health pub csv file and creating dictionary object
     print("\nScraping medRxiv " + search_term + " publication urls", flush = True)
-    text.insert(tk.END, "Scraping medRxiv " + search_term + ' publication urls\n\n'
-    'Look to command prompt window for more ongoing program information, if it is available.\n\n')
-    #with concurrent.futures.ThreadPoolExecutor() as executor:
-     #   future = executor.submit(health_pub_scraper, pubs_per_month, start_date, end_date, search_term)
-        #dict_of_urls = future.result() 
+    text.insert(tk.END, "Scraping medRxiv " + search_term + ' publication urls\n\n')
     dict_of_urls = health_pub_scraper(pubs_per_month, start_date, end_date, search_term)
     # Processing dictionary object with NLP to return a keywords and sentiments file
     # The 'health_pub' part of the string signifies the NLP file name and the ".url" is the NLP query type
@@ -51,8 +46,8 @@ def fetch(entries):
     print("Success\n\nProcessing NLP keyword csv files into graphs", flush = True)
     text.insert(tk.END, "Success!\n\nProcessing NLP keyword csv files into graphs\n")
     kgr.turn_keywords_into_graph(search_term)
-    print("Success")
-    text.insert(tk.END, "Success!")
+    print("Success! Picture files of graphs saved to nlp_keywords folder")
+    text.insert(tk.END, "Success! Picture files of graphs saved to nlp_keywords folder\n\n")
 
 def makeform(root, fields):
     entries = []
@@ -86,5 +81,9 @@ if __name__ == '__main__':
     text.pack(side="left", fill="both", expand=True)
     text.insert(tk.END, 'HealthPub/Tweet NLP Analysis Data/Chart Generator\n\n'
     'Note: Window may show \"Not Responding\" in the title bar, but it is actually '
-    'working in the background.\n\n')
+    'working in the background.\n\nLook to command prompt window for more ongoing '
+    'program information, if it is available.\n\n')
+    print('\nHealthPub/Tweet NLP Analysis Data/Chart Generator\n\n'
+    'Note: GUI window may show \"Not Responding\" in the title bar, but it is actually '
+    'working in the background.\n\nLook here for more ongoing program information!', flush = True)
     root.mainloop()

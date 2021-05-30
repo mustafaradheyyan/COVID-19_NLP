@@ -1,3 +1,4 @@
+import os
 import glob
 import itertools
 import seaborn as sns
@@ -46,7 +47,6 @@ def maximize_graph(backend = None, fullscreen = False):
             mng.window.state('zoomed') #works fine on Windows!
         else:
             print ("Unrecognized backend: ", backend) #not tested on different backends (only Qt)
-    plt.show()
     plt.pause(0.1) #this is needed to make sure following processing gets applied (e.g. tight_layout)
     
 def get_top_keywords_per_date_and_frequency(text_dict, keyword):
@@ -75,7 +75,6 @@ def plot_histogram_top_non_stopwords(file_name, text_dict, keyword):
     x, y = get_top_keywords_per_date_and_frequency(text_dict, keyword)
     keyword_graph = sns.barplot(x = y, y = x)
     customize_keyword_graph(keyword_graph, file_name, keyword)
-    del keyword_graph
     
 def find_keyword_files(file_name):
     file_list = []
