@@ -1,14 +1,16 @@
+import warnings
 import numpy as np
 import generate_nlp_output as nlp
 from read_csv_and_get_dict import *
 
-keywords_path = 'nlp_keywords'
-sentiments_path = 'nlp_sentiments'
-
-if not os.path.exists(keywords_path):
-    os.mkdir(keywords_path)
-if not os.path.exists(sentiments_path):
-    os.mkdir(sentiments_path)
+def initiate_path():
+    keywords_path = 'nlp_keywords'
+    sentiments_path = 'nlp_sentiments'
+    if not os.path.exists(keywords_path):
+        os.mkdir(keywords_path)
+    if not os.path.exists(sentiments_path):
+        os.mkdir(sentiments_path)
+    return keywords_path, sentiments_path
 
 def is_number(price_value):
     try:
@@ -33,7 +35,6 @@ def write_to_file(dictionary, file_name, fieldnames):
         writer = csv.writer(csv_file)
         for date, data in dictionary.items():
             if type(data) == list:
-                print(data)
                 word_list = separate_list_with_date(date, data)
                 writer.writerow(word_list)
             else:
@@ -49,7 +50,9 @@ def calculate_sentiment(nlp_data):
                 for position in positions:
                     sentiment_score += is_number(row.split()[position + 1])
                     sentiment_count += 1
-    return sentiment_score / sentiment_count
+    if sentiment_count:
+        return sentiment_score / sentiment_count
+    else: return 0
 
 def calculate_keywords(nlp_data):
     keywords = []
@@ -66,16 +69,19 @@ def sort_nlp_output(nlp_file_names, nlp_type):
     keyword_dictionary = {}
     for file in nlp_file_names:
         date = file[file_prefix_len:-4]
-        if nlp_type[1:] == 'url':
-            nlp_data = np.loadtxt(file,dtype=str,delimiter=',',skiprows=1,usecols=(3,7,17))
-        elif nlp_type == 'text':
-            nlp_data = np.loadtxt(file,dtype=str,delimiter=',',skiprows=1,usecols=(3,6))
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=UserWarning, append=1)
+            if nlp_type[1:] == 'url':
+                nlp_data = np.loadtxt(file,dtype=str,delimiter=',',skiprows=1,usecols=(3,7,17))
+            elif nlp_type == 'text':
+                nlp_data = np.loadtxt(file,dtype=str,delimiter=',',skiprows=1,usecols=(3,6))
         os.remove(file)
         sentiment_dictionary[date] = calculate_sentiment(nlp_data)
         keyword_dictionary[date] = calculate_keywords(nlp_data)
     return keyword_dictionary, sentiment_dictionary
 
 def get_nlp_keywords_and_sentiment_to_file(nlp_dictionary, nlp_type):
+    keywords_path, sentiments_path = initiate_path()
     nlp_file_names = nlp.generate_nlp_output(nlp_dictionary, nlp_type[-4:])
     keyword_dic, sentiment_dic = sort_nlp_output(nlp_file_names, nlp_type[-4:])
     write_to_file(keyword_dic, os.path.join(keywords_path, nlp_type[:-5] + '_nlp_keywords.csv'),\

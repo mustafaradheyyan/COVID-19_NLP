@@ -6,9 +6,11 @@ import calendar
 import snscrape.modules.twitter as sntwitter
 import pandas as pd
 
-path = 'tweets'
-if not os.path.exists(path):
-    os.mkdir(path)
+tweet_path = 'tweets'
+
+def initiate_path():
+    if not os.path.exists(tweet_path):
+        os.mkdir(tweet_path)
 
 def calculate_days_in_month(month, year):
     return calendar.monthrange(year, month)[1]
@@ -43,12 +45,13 @@ def get_twitter_search_string(keyword, start_date, end_date):
                 + str(end_date[-10:-8]) + '-' + str(end_date[-7:-5]))
      
 def get_file_name_string(keyword, end_date):
-    end_date = subtract_date_by_days(end_date, 1)
+    end_date = subtract_date_by_days(end_date, 1, '%m-%d-%Y')
     return str(keyword + '_' + str(end_date[-10:-8]) + '-' + str(end_date[-7:-5]) +\
                '-' + str(end_date[-2:]) + '.csv')
 
 def tweet_scraper(number_of_tweets_per_month, start_date, end_date, keyword):
     # Using TwitterSearchScraper to scrape data and append tweets to list
+    initiate_path()
     months = calculate_number_of_months(start_date, end_date, '%m-%d-%Y')
     final_date = end_date
     for month_count in range(0, months + 1):
@@ -65,7 +68,7 @@ def tweet_scraper(number_of_tweets_per_month, start_date, end_date, keyword):
             tweets_list2.append([tweet.date, tweet.id, tweet.content])
         # Creating a dataframe from the tweets list above
         tweets_df2 = pd.DataFrame(tweets_list2, columns=['Datetime', 'Tweet Id', 'Text'])
-        file_name = os.path.join(path, get_file_name_string(keyword, end_date))
+        file_name = os.path.join(tweet_path, get_file_name_string(keyword, end_date))
         tweets_df2.to_csv(file_name)
         start_date = add_date_by_days(end_date, 1, '%m-%d-%Y')
         
