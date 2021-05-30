@@ -35,20 +35,22 @@ def customize_sentiment_graph(keyword):
     plt.title(keyword.title() + ' Health Pub and Tweet Sentiment over Time', fontsize = 25)
     plt.xlabel("Sentiment", fontsize = 20)
     plt.ylabel("Degree", fontsize = 20)
+    plt.legend(loc="upper left")
     maximize_graph()
-    plt.savefig(keyword + '_sentiment_graph.png', bbox_inches = 'tight')
+    plt.savefig(path + '\\' + keyword + '_sentiment_graph.png', bbox_inches = 'tight')
     plt.show()
 
-def get_sentiment_per_date(sentiment_dict, keyword): 
-    key, value = list(sentiment_dict.values())
-    return key, value
+def get_sentiment_per_date(sentiment_dict): 
+    x1 = list(sentiment_dict)
+    y1 = list(sentiment_dict.values())
+    y1 = list(map(float, y1))
+    return x1, y1
 
-def plot_sentiment_linegraph(sentiment_dict, keyword):
-    x = list(sentiment_dict)
-    y = list(sentiment_dict.values())
-    y = list(map(float, y))
-    plt.plot(x, y, label = "line A")#((list(sentiment_dict.keys())[0]).title()))
-    #plt.plot(x[1], y[1], label = "line B")#((list(sentiment_dict.keys())[1]).title()))
+def plot_sentiment_linegraph(tweet_sentiment_dict, health_pub_sentiment_dict, keyword):
+    x1, y1 = get_sentiment_per_date(tweet_sentiment_dict)
+    x2, y2 = get_sentiment_per_date(health_pub_sentiment_dict)
+    plt.plot(x1, y1, label = "Tweets")
+    plt.plot(x2, y2, label = "Health Pub")
     customize_sentiment_graph(keyword)
     
 def find_sentiment_files(file_name):
@@ -61,8 +63,11 @@ def find_sentiment_files(file_name):
 def turn_sentiment_into_graph(keyword):
     file_list = find_sentiment_files(os.path.join(path, '*_nlp_sentiments.csv'))
     for file in file_list:
-        sentiment_dict = create_dictionary_object(open_read_csv_file(file))
-        plot_sentiment_linegraph(sentiment_dict, keyword)
+        if file[len(path)+1:-len('_nlp_sentiments.csv')] == 'health_pub':
+            tweet_sentiment_dict = create_dictionary_object(open_read_csv_file(file))
+        else: 
+            health_pub_sentiment_dict = create_dictionary_object(open_read_csv_file(file))
+    plot_sentiment_linegraph(tweet_sentiment_dict, health_pub_sentiment_dict, keyword)
 
 def main():
     keyword = 'COVID-19'
