@@ -33,6 +33,7 @@ def write_to_file(dictionary, file_name, fieldnames):
         writer = csv.writer(csv_file)
         for date, data in dictionary.items():
             if type(data) == list:
+                print(data)
                 word_list = separate_list_with_date(date, data)
                 writer.writerow(word_list)
             else:

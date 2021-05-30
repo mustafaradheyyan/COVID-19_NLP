@@ -27,24 +27,35 @@ def health_pub_scraper(number_of_pubs_per_month, start_date, end_date, search_te
         # Creating list to append tweet data to
         url_list = []
         if not months == month_count:
-            print('before changing end_date: ' + end_date)
             end_date = calculate_end_date(start_date, end_date, '%d-%m-%Y')
-            print('after changing end_date: ' + end_date)
         else:
             end_date = final_date
-        for monthly_page_count in (range(0, math.ceil(number_of_pubs_per_month / number_of_results_per_page) + 1)):
+            
+        pages = math.ceil(number_of_pubs_per_month / number_of_results_per_page)
+        for monthly_page_count in range(0, pages):
             URL = (f'https://www.medrxiv.org/search/{search_term}%20limit_from%3A{start_date}%20limit_to%'
                    f'3A{end_date}%20numresults%3A{number_of_results_per_page}%20sort%3Arelevance-rank'
                    f'%20format_result%3Astandard{additional_pages}{monthly_page_count}')
-            print(URL)
             page = requests.get(URL)
             soup = BeautifulSoup(page.content, 'html.parser')
-            url_list.append(soup.find_all('a', href=re.compile('/content/10.1101/*')))
+            href_results = soup.find_all('a', href=re.compile('/content/10.1101/*'))
+            if not pages == monthly_page_count + 1:
+                pages_remaining = number_of_results_per_page
+            else:
+                pages_remaining = number_of_pubs_per_month - (monthly_page_count * number_of_results_per_page)
+            page_remaining_count = 0
+            print(start_date + ' ' + end_date + ': ' + str(pages_remaining))
+            for result in href_results:
+                #print(result.attrs)
+                if page_remaining_count >= pages_remaining:
+                    break
+                url_list.append(result['href'])
+                page_remaining_count += 1
 
-        print(start_date)
-        print(end_date)
-        url_dict[calculate_mid_date(start_date, end_date, '%d-%m-%Y')] = url_list 
+        print(url_list, file=open('../log' + str(month_count) + '.txt', 'w'))
+        url_dict[calculate_mid_date(start_date, end_date, '%d-%m-%Y')] = url_list
+        #print(url_dict)
         start_date = add_date_by_days(end_date, 1, '%d-%m-%Y')
 
-    #write_to_file(url_dict, os.path.join(path, search_term + '_url_dict_csv.csv'), ['Date', 'URL'])
-    print(url_dict, file=open('../log.txt', 'w'))
+    write_to_file(url_dict, os.path.join(path, search_term + '_url_dict_csv.csv'), ['Date', 'URL'])
+    #print(url_dict, file=open('../log.txt', 'w'))
