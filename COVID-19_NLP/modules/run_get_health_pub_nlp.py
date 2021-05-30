@@ -4,10 +4,10 @@ from health_pub_scraper import *
 from process_nlp_output import *
 
 def main():
-    search_term = 'COVID-19'
-    # dd-mm-YYYY format
-    start_date = '12-01-2020'
-    end_date = '24-03-2020'
+    search_term = 'COVID-19 OR nCOV'
+    # mm-dd-YYYY format
+    start_date = '01-20-2020'
+    end_date = '03-24-2020'
     number_of_pubs_per_month = 3
     
     dict_of_urls = health_pub_scraper(number_of_pubs_per_month, start_date, end_date, search_term)

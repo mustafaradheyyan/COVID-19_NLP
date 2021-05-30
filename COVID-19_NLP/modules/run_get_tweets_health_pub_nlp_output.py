@@ -1,13 +1,18 @@
 import sys
 import os
 sys.path.insert(0, 'backend processing')
+sys.path.insert(0, 'frontend gui')
 from health_pub_scraper import *
 from tweet_scraper import *
 from tweet_to_dict import *
 from process_nlp_output import *
 import keywords_into_graph as kgr
+from user_input_gui import *
 
 def main():
+    gui_window = Window()
+    #start_date, end_date, search_term, number_of_pubs_per_month, number_of_tweets_per_month = create_user_input_gui()
+
     # Only change the 5 variables below from "start_date" to "number_of_tweets_per_month"
     # Start date for searching tweets
     start_date = '01-12-2020'
