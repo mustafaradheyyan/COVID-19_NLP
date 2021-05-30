@@ -1,5 +1,4 @@
 import csv
-import os
 
 def append_value(dict_obj, key, value):
     # Check if key exist in dict or not
@@ -19,7 +18,7 @@ def append_value(dict_obj, key, value):
 def open_read_csv_file(file_to_read_in):
     file_obj = open(file_to_read_in, 'r', newline='')
     csv_object = csv.reader(file_obj)
-    csv_object_header = next(csv_object)
+    next(csv_object)
     return csv_object
 
 def create_dictionary_object(csv_object) -> dict:
