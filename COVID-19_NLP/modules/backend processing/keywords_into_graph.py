@@ -57,7 +57,7 @@ def get_top_keywords_per_date_and_frequency(text_dict, keyword):
         new = " ".join(text).split()
         most = Counter(new).most_common()
         for word,count in most[:len(stop)+1]:
-            if (word not in stop):
+            if (word not in stop and word[0] != "@"):
                 x.append(count)
                 y.append(word + '\n' + date)
                 break;
