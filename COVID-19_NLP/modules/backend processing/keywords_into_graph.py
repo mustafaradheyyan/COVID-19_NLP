@@ -1,3 +1,4 @@
+import os
 import glob
 import itertools
 import seaborn as sns
@@ -28,13 +29,13 @@ def update_stop_words_with_keyword_permutations(keyword):
                 new_stop_words.extend(list(map(''.join, itertools.product(*zip(sub_word.upper(),sub_word.lower())))))
     
 # maximize_graph function code taken from https://stackoverflow.com/a/52324347
-def maximize_graph(backend=None,fullscreen=False):
+def maximize_graph(backend = None, fullscreen = False):
     """Maximize window independently on backend.
     Fullscreen sets fullscreen mode, that is same as maximized, but it doesn't have title bar (press key F to toggle full screen mode)."""
     if backend is None:
-        backend=plt.get_backend()
+        backend = plt.get_backend()
     mng = plt.get_current_fig_manager()
-
+    
     if fullscreen:
         mng.full_screen_toggle()
     else:
@@ -45,8 +46,7 @@ def maximize_graph(backend=None,fullscreen=False):
         elif backend == 'TkAgg':
             mng.window.state('zoomed') #works fine on Windows!
         else:
-            print ("Unrecognized backend: ",backend) #not tested on different backends (only Qt)
-
+            print ("Unrecognized backend: ", backend) #not tested on different backends (only Qt)
     plt.pause(0.1) #this is needed to make sure following processing gets applied (e.g. tight_layout)
     
 def get_top_keywords_per_date_and_frequency(text_dict, keyword):
