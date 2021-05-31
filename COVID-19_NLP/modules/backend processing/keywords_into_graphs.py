@@ -68,7 +68,7 @@ def get_top_keywords_per_date_and_frequency(text_dict, keyword):
     return x, y
 
 def customize_keyword_graph(keyword_graph, file_name, keyword):
-    keyword_graph.set_title(keyword.title() + ' ' + file_name[len(path)+1+len(keyword)+1:-len('_nlp_keywords.csv')]\
+    keyword_graph.set_title(keyword.title() + ' ' + file_name[len(path)+1+len(keyword)+1+22:-len('_nlp_keywords.csv')]\
                              .replace('_', ' ').title() + ' Keyword Frequency over Time')
     keyword_graph.set_xlabel("Keyword\nDate", fontsize = 20)
     keyword_graph.set_ylabel("Frequency")
@@ -90,9 +90,10 @@ def find_keyword_files(file_name):
         file_list.append(file)
     return file_list   
     
-def turn_keywords_into_graphs(keyword):
+def turn_keywords_into_graphs(keyword, start_date, end_date):
     update_stop_words_with_keyword_permutations(keyword)
-    file_list = find_keyword_files(os.path.join(path, keyword + '*_nlp_keywords.csv'))
+    file_list = find_keyword_files(os.path.join(path, keyword + '_' + start_date + '_'\
+                                                   + end_date + '_' + '*_nlp_keywords.csv'))
     if file_list:
         for file in file_list:
             keyword_dict = create_dictionary_object(open_read_csv_file(file))
@@ -102,7 +103,9 @@ def turn_keywords_into_graphs(keyword):
     
 def main():
     keyword = 'COVID-19'
-    turn_keywords_into_graphs(keyword)
+    start_date = '11-10-2020'
+    end_date = '12-11-2020'
+    turn_keywords_into_graphs(keyword, start_date, end_date)
         
 if __name__ == '__main__':
     main()

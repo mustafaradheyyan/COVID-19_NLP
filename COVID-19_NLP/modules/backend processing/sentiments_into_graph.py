@@ -1,5 +1,6 @@
 import os
 import glob
+import datetime
 import matplotlib.pyplot as plt
 from read_csv_and_get_dict import *
 
@@ -46,18 +47,24 @@ def customize_sentiment_graph(keyword, x1, y1, y2):
     maximize_graph()
     plt.savefig(path + '\\' + keyword + '_sentiment_graph.png', bbox_inches = 'tight')
 
+def to_integer(dt_time):
+    return int(round(dt_time.timestamp() * 1000))
+
 def get_sentiment_per_date(sentiment_dict): 
     x1 = list(sentiment_dict)
+    x1 = [to_integer(datetime.datetime.strptime(value, '%m-%d-%Y')) for value in x1]
     y1 = list(sentiment_dict.values())
     y1 = list(map(float, y1))
     return x1, y1
 
-def plot_sentiment_linegraph(tweet_sentiment_dict, health_pub_sentiment_dict, keyword):
+def plot_sentiment_line_graph(tweet_sentiment_dict, health_pub_sentiment_dict, keyword):
+    reserve_x_ticks = list(tweet_sentiment_dict)
     x1, y1 = get_sentiment_per_date(tweet_sentiment_dict)
     x2, y2 = get_sentiment_per_date(health_pub_sentiment_dict)
     plt.plot(x1, y1, label = "Tweets")
-    plt.plot(x1, y2, label = "Health Pub (Higher is more positive)")
-    customize_sentiment_graph(keyword, x1, y1[0], y2[0])
+    plt.plot(x2, y2, label = "Health Pub (Higher is more positive)")
+    plt.xticks(x1, reserve_x_ticks)
+    customize_sentiment_graph(keyword, reserve_x_ticks, y1[0], y2[0])
     plt.close('all')
     
 def find_sentiment_files(file_name):
@@ -66,22 +73,25 @@ def find_sentiment_files(file_name):
         file_list.append(file)
     return file_list
     
-def turn_sentiments_into_graph(keyword):
-    file_list = find_sentiment_files(os.path.join(path, keyword + '*_nlp_sentiments.csv'))
+def turn_sentiments_into_graph(keyword, start_date, end_date):
+    file_list = find_sentiment_files(os.path.join(path, keyword + '_' + start_date + '_'\
+                                                   + end_date + '_' + '*_nlp_sentiments.csv'))
     if file_list:
         for file in file_list:
-            print(file)
-            if file[len(path)+1+len(keyword):-len('_nlp_sentiments.csv')] == '_health_pub':
+            if file[len(path)+len('\\')+len(keyword)+len('_' + start_date + '_' + end_date):\
+                                              -len('_nlp_sentiments.csv')] == '_health_pub':
                 health_pub_sentiment_dict = create_dictionary_object(open_read_csv_file(file))
             else:
                 tweet_sentiment_dict = create_dictionary_object(open_read_csv_file(file))
-        plot_sentiment_linegraph(tweet_sentiment_dict, health_pub_sentiment_dict, keyword)
+        plot_sentiment_line_graph(tweet_sentiment_dict, health_pub_sentiment_dict, keyword)
     else:
         return -1
 
 def main():
     keyword = 'COVID-19'
-    turn_sentiments_into_graph(keyword)
+    start_date = '11-10-2020'
+    end_date = '12-11-2020'
+    turn_sentiments_into_graph(keyword, start_date, end_date)
         
 if __name__ == '__main__':
     main()
