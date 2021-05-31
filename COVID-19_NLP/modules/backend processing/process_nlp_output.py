@@ -1,6 +1,4 @@
 import os
-import warnings
-import numpy as np
 import generate_nlp_output as nlp
 from read_csv_and_get_dict import *
 
@@ -26,8 +24,9 @@ def write_header(csv_file, fieldnames):
 
 def separate_list_with_date(date, data):
     concat_word = (date + ',')
-    for word in data:
-        concat_word = (concat_word + word + ',')
+    if type(data[0]) != float and type(data[0]) != int:
+        for word in data:
+            concat_word = (concat_word + word + ',')
     return concat_word.split(',')
 
 def write_to_file(dictionary, file_name, fieldnames):
@@ -41,63 +40,31 @@ def write_to_file(dictionary, file_name, fieldnames):
             else:
                 writer.writerow([date,data])
 
-def calculate_sentiment(nlp_data):
-    sentiment_score = 0.0
-    sentiment_count = 0
-    for pub_data in nlp_data:
-        if type(pub_data) != np.ndarray:
-            positions=[x for x in range(len(pub_data.split()))if pub_data.split()[x]=='{\'score\':']
-            if positions:
-                for position in positions:
-                    sentiment_score += is_number(pub_data.split()[position + 1])
-                    sentiment_count += 1
-        else:
-            for row in pub_data:
-                positions=[x for x in range(len(row.split()))if row.split()[x]=='{\'score\':']
-                if positions:
-                    for position in positions:
-                        sentiment_score += is_number(row.split()[position + 1])
-                        sentiment_count += 1
-    if sentiment_count:
-        return sentiment_score / sentiment_count
-    else: return 0
+def write_results_to_keyword_file(file_name, keyword_dict):
+    date_keyword_dict = {}
+    with open(file_name, mode='w', newline='', encoding='utf-8') as csv_file:
+        for date, nlp_list in keyword_dict.items():
+            keyword_list = []
+            for keyword in nlp_list[0]['keywords']:
+                keyword_list.append(keyword['text'])
+            date_keyword_dict[date] = keyword_list
+        write_to_file(date_keyword_dict, file_name, ['Date', 'Keywords'])
 
-def calculate_keywords(nlp_data):
-    keywords = []
-    for pub_data in nlp_data:
-        if type(pub_data) != np.ndarray:
-            position = pub_data.find('{\'text\':')
-            if position >= 0:
-                keywords.append(pub_data[position+10:][:-1])
-        else:
-            for row in pub_data:
-                position = row.find('{\'text\':')
-                if position >= 0:
-                    keywords.append(row[position+10:][:-1])
-    return keywords
+def write_results_to_sentiment_file(file_name, sentiment_dict):
+    date_sentiment_dict = {}
+    with open(file_name, mode='w', newline='', encoding='utf-8') as csv_file:
+        for date, nlp_list in sentiment_dict.items():
+            sentiment_value = 0
+            sentiment_count = 0
+            for sentiment in nlp_list:
+                sentiment_value += sentiment['sentiment']['document']['score']
+                sentiment_count += 1
+            sentiment_value /= sentiment_count
+            date_sentiment_dict[date] = sentiment_value
+        write_to_file(date_sentiment_dict, file_name, ['Date', 'Sentiment'])
 
-def sort_nlp_output(nlp_file_names, nlp_type):
-    file_prefix_len = len('nlp_results_')
-    sentiment_dictionary = {}
-    keyword_dictionary = {}
-    for file in nlp_file_names:
-        date = file[file_prefix_len:-4]
-        with warnings.catch_warnings():
-            warnings.filterwarnings("ignore", category=UserWarning, append=1)
-            if nlp_type[1:] == 'url':
-                nlp_data = np.loadtxt(file,dtype=str,delimiter=',',skiprows=1,usecols=(3,7,17,18))
-            elif nlp_type == 'text':
-                nlp_data = np.loadtxt(file,dtype=str,delimiter=',',skiprows=1,usecols=(3,6))
-        os.remove(file)
-        sentiment_dictionary[date] = calculate_sentiment(nlp_data)
-        keyword_dictionary[date] = calculate_keywords(nlp_data)
-    return keyword_dictionary, sentiment_dictionary
-
-def get_nlp_keywords_and_sentiment_to_file(nlp_dictionary, nlp_type, user_api_key, user_service_url):
+def get_nlp_keywords_and_sentiment_to_file(keyword, nlp_dictionary, nlp_type, user_api_key, user_service_url):
     keywords_path, sentiments_path = initiate_path()
-    nlp_file_names = nlp.generate_nlp_output(nlp_dictionary, nlp_type[-4:], user_api_key, user_service_url)
-    keyword_dic, sentiment_dic = sort_nlp_output(nlp_file_names, nlp_type[-4:])
-    write_to_file(keyword_dic, os.path.join(keywords_path, nlp_type[:-5] + '_nlp_keywords.csv'),\
-                                                                          ['Date', 'Keywords'])
-    write_to_file(sentiment_dic, os.path.join(sentiments_path, nlp_type[:-5] + '_nlp_sentiments.csv'),\
-                                                                          ['Date', 'Sentiment'])
+    nlp_dict = nlp.generate_nlp_output(nlp_dictionary, nlp_type[-4:], user_api_key, user_service_url)
+    write_results_to_keyword_file(os.path.join(keywords_path, keyword + '_' + nlp_type[:-5] + '_nlp_keywords.csv'), nlp_dict)    
+    write_results_to_sentiment_file(os.path.join(sentiments_path, keyword + '_' + nlp_type[:-5] + '_nlp_sentiments.csv'), nlp_dict)

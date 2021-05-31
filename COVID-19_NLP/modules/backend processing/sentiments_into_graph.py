@@ -57,12 +57,15 @@ def find_sentiment_files(file_name):
     
 def turn_sentiments_into_graph(keyword):
     file_list = find_sentiment_files(os.path.join(path, '*_nlp_sentiments.csv'))
-    for file in file_list:
-        if file[len(path)+1:-len('_nlp_sentiments.csv')] == 'health_pub':
-            health_pub_sentiment_dict = create_dictionary_object(open_read_csv_file(file))
-        else: 
-            tweet_sentiment_dict = create_dictionary_object(open_read_csv_file(file))
-    plot_sentiment_linegraph(tweet_sentiment_dict, health_pub_sentiment_dict, keyword)
+    if file_list:
+        for file in file_list:
+            if file[len(path)+1+len(keyword):-len('_nlp_sentiments.csv')] == '_health_pub':
+                health_pub_sentiment_dict = create_dictionary_object(open_read_csv_file(file))
+            else:
+                tweet_sentiment_dict = create_dictionary_object(open_read_csv_file(file))
+        plot_sentiment_linegraph(tweet_sentiment_dict, health_pub_sentiment_dict, keyword)
+    else:
+        return -1
 
 def main():
     keyword = 'COVID-19'
