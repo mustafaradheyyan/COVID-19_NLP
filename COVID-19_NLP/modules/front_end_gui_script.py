@@ -14,22 +14,59 @@ fields = 'Search Term', 'Start Date (mm-dd-yyyy)', 'End Date  (mm-dd-yyyy)',\
 text_list = 'COVID-19', '01-12-2020', '05-24-2021', 30, 5, 2, 'ydoMxOX7J7I788-6Te0UO_YV9G7CO9az2tzkJlkegWcT',\
 'https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/69dbbfc3-ca34-4da9-986b-c5f0473ce007'
 
+def error_check_keywords(number_of_keywords):
+    if number_of_keywords == 0:
+        text.insert(tk.END, 'Error! Number of keywords must be greater than 0\n')
+        return -1
+    else:
+        return 0
+
+def error_check_api_key_url(user_api_key, user_service_url):
+    if user_api_key == '':
+        if user_service_url == '':
+            text.insert(tk.END, 'Error! Blank API and URL key.\n\n')
+            return -1
+        else:
+            text.insert(tk.END, 'Error! Blank API key.\n\n')
+            return -1
+    elif user_service_url == '':
+        text.insert(tk.END, 'Error! Blank URL key.\n\n')
+        return -1
+    else:
+        return 0
+
+def error_check_date(start_date, end_date):
+    if datetime.strptime(end_date, '%m-%d-%Y') < datetime.strptime(start_date, '%m-%d-%Y'):
+        text.insert(tk.END, 'Error! End date is before start date.\n\n')
+        return -1
+    else:
+        return 0
+
 def fetch(entries):
     # Getting user input from text entries in GUI window, defaults are set above in [text_list]
     search_term = entries[0][1].get()
     start_date = entries[1][1].get()
     end_date = entries[2][1].get()
+    date_error_code = error_check_date(start_date, end_date)
     tweets_per_month = int(entries[3][1].get())
     pubs_per_month = int(entries[4][1].get())
     number_of_keywords = int(entries[5][1].get())
+    keyword_error_code = error_check_keywords(number_of_keywords)
     user_api_key = entries[6][1].get()
     user_service_url = entries[7][1].get()
+    api_error_code = error_check_api_key_url(user_api_key, user_service_url)
+    if keyword_error_code == -1 or api_error_code == -1 or date_error_code == -1:
+        error_code = -1
+    else:
+        error_code = 0
     return search_term, start_date, end_date, pubs_per_month, tweets_per_month, number_of_keywords, user_api_key,\
-                                                                                                 user_service_url
+                                                                                user_service_url, error_code
 
 def start_processing(entries):
     search_term, start_date, end_date, pubs_per_month, tweets_per_month, number_of_keywords, user_api_key,\
-                          user_service_url = fetch(entries)
+              user_service_url, error_code = fetch(entries)
+    if error_code == -1:
+        return
     dict_of_urls, dict_of_text, error_code = web_scraping_for_keyword(search_term, start_date, end_date,\
     pubs_per_month, tweets_per_month)
     if error_code == -1: 
