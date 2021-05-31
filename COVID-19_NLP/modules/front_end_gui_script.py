@@ -11,7 +11,7 @@ import tkinter as tk
 fields = 'Search Term', 'Start Date (mm-dd-yyyy)', 'End Date  (mm-dd-yyyy)',\
 'Number of tweets per month', 'Number of health pubs per month', 'IBM Watson NLU API Key',\
 'IBM Watson Service URL'
-text_list = 'COVID-19', "01-12-2020", '05-24-2021', 5, 5, '4Ac-fI2WAly37w3y9EFyLbadnail9QU-hUk9shNck1eE',\
+text_list = 'COVID-19', "05-12-2020", '08-24-2020', 1, 1, '4Ac-fI2WAly37w3y9EFyLbadnail9QU-hUk9shNck1eE',\
 'https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/347c5943-5b2f-435f-a501-4807978a45f6'
 
 def fetch(entries):
