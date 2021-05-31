@@ -9,9 +9,9 @@ import keywords_into_graphs as kgr
 import tkinter as tk
 
 fields = 'Search Term', 'Start Date (mm-dd-yyyy)', 'End Date  (mm-dd-yyyy)',\
-'Number of tweets per month', 'Number of health pubs per month', 'IBM Watson NLU API Key',\
-'IBM Watson Service URL'
-text_list = 'COVID-19', "05-12-2020", '08-24-2020', 1, 1, '4Ac-fI2WAly37w3y9EFyLbadnail9QU-hUk9shNck1eE',\
+'Number of tweets per month', 'Number of health pubs per month','Number of keywords per nlp analysis',\
+'IBM Watson NLU API Key','IBM Watson Service URL'
+text_list = 'COVID-19', "01-12-2020", '08-24-2020', 1, 1, 4, '4Ac-fI2WAly37w3y9EFyLbadnail9QU-hUk9shNck1eE',\
 'https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/347c5943-5b2f-435f-a501-4807978a45f6'
 
 def fetch(entries):
@@ -19,16 +19,17 @@ def fetch(entries):
     search_term = entries[0][1].get()
     start_date = entries[1][1].get()
     end_date = entries[2][1].get()
-    pubs_per_month = float(entries[3][1].get())
-    tweets_per_month = float(entries[4][1].get())
-    user_api_key = entries[5][1].get()
-    user_service_url = entries[6][1].get()
-    return search_term, start_date, end_date, pubs_per_month, tweets_per_month, user_api_key, user_service_url
+    pubs_per_month = int(entries[3][1].get())
+    tweets_per_month = int(entries[4][1].get())
+    number_of_keywords = int(entries[5][1].get())
+    user_api_key = entries[6][1].get()
+    user_service_url = entries[7][1].get()
+    return search_term, start_date, end_date, pubs_per_month, tweets_per_month, number_of_keywords, user_api_key, user_service_url
 
 def start_processing(entries):
-    search_term, start_date, end_date, pubs_per_month, tweets_per_month, user_api_key, user_service_url = fetch(entries)
+    search_term, start_date, end_date, pubs_per_month, tweets_per_month, number_of_keywords, user_api_key, user_service_url = fetch(entries)
     dict_of_urls, dict_of_text = web_scraping_for_keyword(search_term, start_date, end_date, pubs_per_month, tweets_per_month)
-    nlp_analysis_of_keyword_content(search_term, dict_of_urls, dict_of_text, user_api_key, user_service_url)
+    nlp_analysis_of_keyword_content(search_term, dict_of_urls, dict_of_text, user_api_key, user_service_url, number_of_keywords)
     graph_functions(search_term)
 
 def web_scraping_for_keyword(search_term, start_date, end_date, pubs_per_month, tweets_per_month):
@@ -46,17 +47,17 @@ def web_scraping_for_keyword(search_term, start_date, end_date, pubs_per_month, 
     dict_of_text = get_tweet_csv_data_into_text_dict(start_date, end_date, search_term)
     return dict_of_urls, dict_of_text
 
-def nlp_analysis_of_keyword_content(search_term, dict_of_urls, dict_of_text, user_api_key, user_service_url):
+def nlp_analysis_of_keyword_content(search_term, dict_of_urls, dict_of_text, user_api_key, user_service_url, number_of_keywords):
     # Processing dictionary object with NLP to return a keywords and sentiments file
     # The 'health_pub' part of the string signifies the NLP file name and the ".url" is the NLP query type
     print("Success\n\nProcessing health pub urls with NLP", flush = True)
     text.insert(tk.END, "Success!\n\nProcessing health pub urls with NLP\n")
-    get_nlp_keywords_and_sentiment_to_file(search_term, dict_of_urls, 'health_pub..url', user_api_key, user_service_url)
+    get_nlp_keywords_and_sentiment_to_file(search_term, dict_of_urls, 'health_pub..url', user_api_key, user_service_url, number_of_keywords)
     # Processing dictionary object with NLP to return a keywords and sentiments file
     # The 'tweet' part of the string signifies the NLP file name and the "text" is the NLP query type
     print("Success\n\nProcessing tweets with NLP", flush = True)
     text.insert(tk.END, "Success!\n\nProcessing tweets with NLP\n")
-    get_nlp_keywords_and_sentiment_to_file(search_term, dict_of_text, 'tweet.text', user_api_key, user_service_url)
+    get_nlp_keywords_and_sentiment_to_file(search_term, dict_of_text, 'tweet.text', user_api_key, user_service_url, number_of_keywords)
     text.insert(tk.END, "Success!\n\n")
 
 def graph_functions(search_term):
