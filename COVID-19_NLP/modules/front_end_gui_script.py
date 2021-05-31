@@ -11,7 +11,7 @@ import tkinter as tk
 fields = 'Search Term', 'Start Date (mm-dd-yyyy)', 'End Date  (mm-dd-yyyy)',\
 'Number of tweets per month', 'Number of health pubs per month','Number of keywords per nlp analysis',\
 'IBM Watson NLU API Key','IBM Watson Service URL'
-text_list = 'COVID-19', "01-12-2020", '08-24-2020', 1, 1, 4, '4Ac-fI2WAly37w3y9EFyLbadnail9QU-hUk9shNck1eE',\
+text_list = 'COVID-19', "01-12-2020", '01-24-2020', 1, 1, 10, '4Ac-fI2WAly37w3y9EFyLbadnail9QU-hUk9shNck1eE',\
 'https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/347c5943-5b2f-435f-a501-4807978a45f6'
 
 def fetch(entries):
@@ -28,24 +28,33 @@ def fetch(entries):
 
 def start_processing(entries):
     search_term, start_date, end_date, pubs_per_month, tweets_per_month, number_of_keywords, user_api_key, user_service_url = fetch(entries)
-    dict_of_urls, dict_of_text = web_scraping_for_keyword(search_term, start_date, end_date, pubs_per_month, tweets_per_month)
+    dict_of_urls, dict_of_text, error_code = web_scraping_for_keyword(search_term, start_date, end_date, pubs_per_month, tweets_per_month)
+    if error_code == -1:
+        return
     nlp_analysis_of_keyword_content(search_term, dict_of_urls, dict_of_text, user_api_key, user_service_url, number_of_keywords)
     graph_functions(search_term)
 
 def web_scraping_for_keyword(search_term, start_date, end_date, pubs_per_month, tweets_per_month):
     # Reading health pub csv file and creating dictionary object
     print("\nScraping medRxiv " + search_term + " publication urls", flush = True)
-    text.insert(tk.END, "Scraping medRxiv " + search_term + ' publication urls\n')
-    dict_of_urls = health_pub_scraper(pubs_per_month, start_date, end_date, search_term)
+    text.insert(tk.END, "\nScraping medRxiv " + search_term + ' publication urls\n')
+    dict_of_urls, error_code = health_pub_scraper(pubs_per_month, start_date, end_date, search_term)
+    if error_code == -1:
+        print('Failure! 0 Results for term "' + search_term + '" and posted between "' +\
+               start_date + '" and "' + end_date + '"\n\nSearch will now terminate!\n', flush = True)
+        text.insert(tk.END, 'Failure! 0 Results for term "' + search_term + '" and posted between "' +\
+               start_date + '" and "' + end_date + '"\n\nSearch will now terminate!\n')
+        return None, None, error_code
     # Getting English tweets from Twitter based on dates and search term
-    print("Success\n\nScraping Twitter tweets", flush = True)
-    text.insert(tk.END, "Success!\n\nScraping Twitter tweets\n")
+    else:
+        print("Success\n\nScraping Twitter tweets", flush = True)
+        text.insert(tk.END, "Success!\n\nScraping Twitter tweets\n")
     tweet_scraper(tweets_per_month, start_date, end_date, search_term)
     # Reading tweets csv files and creating a dictionary object from it
     print("Success\n\nConverting tweet csv files into a text dictionary", flush = True)
     text.insert(tk.END, "Success!\n\nConverting tweet csv files into a text dictionary\n")
     dict_of_text = get_tweet_csv_data_into_text_dict(start_date, end_date, search_term)
-    return dict_of_urls, dict_of_text
+    return dict_of_urls, dict_of_text, 1
 
 def nlp_analysis_of_keyword_content(search_term, dict_of_urls, dict_of_text, user_api_key, user_service_url, number_of_keywords):
     # Processing dictionary object with NLP to return a keywords and sentiments file

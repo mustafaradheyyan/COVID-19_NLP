@@ -1,4 +1,5 @@
 import os
+from tkinter import messagebox
 import glob
 import itertools
 import seaborn as sns
@@ -76,7 +77,10 @@ def customize_keyword_graph(keyword_graph, file_name, keyword):
 
 def plot_histogram_top_non_stopwords(file_name, text_dict, keyword):
     x, y = get_top_keywords_per_date_and_frequency(text_dict, keyword)
-    keyword_graph = sns.barplot(x = y, y = x)
+    try:
+        keyword_graph = sns.barplot(x = y, y = x)
+    except ValueError:
+        messagebox.showerror("Keyword Graph Error", "The " + keyword + " CSV file you are trying to graph is empty.")
     customize_keyword_graph(keyword_graph, file_name, keyword)
     plt.close('all')
     
@@ -88,7 +92,7 @@ def find_keyword_files(file_name):
     
 def turn_keywords_into_graphs(keyword):
     update_stop_words_with_keyword_permutations(keyword)
-    file_list = find_keyword_files(os.path.join(path, '*_nlp_keywords.csv'))
+    file_list = find_keyword_files(os.path.join(path, keyword + '*_nlp_keywords.csv'))
     if file_list:
         for file in file_list:
             keyword_dict = create_dictionary_object(open_read_csv_file(file))

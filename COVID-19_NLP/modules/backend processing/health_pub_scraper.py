@@ -51,19 +51,22 @@ def health_pub_scraper(number_of_pubs_per_month, start_date, end_date, search_te
                    f'3A{end_date}%20numresults%3A{number_of_results_per_page}%20sort%3Arelevance-rank'
                    f'%20format_result%3Astandard{additional_pages}{monthly_page_count}')
             href_results = get_url_href_results(URL)
-            if not pages == monthly_page_count + 1:
-                pages_remaining = number_of_results_per_page
+            if href_results:
+                if not pages == monthly_page_count + 1:
+                    pages_remaining = number_of_results_per_page
+                else:
+                    pages_remaining = number_of_pubs_per_month - (monthly_page_count * number_of_results_per_page)
+                page_remaining_count = 0
+                for result in href_results:
+                    if page_remaining_count >= pages_remaining:
+                        break
+                    url_list.append('https://www.medrxiv.org' + result['href'] + '.full-text')
+                    page_remaining_count += 1
             else:
-                pages_remaining = number_of_pubs_per_month - (monthly_page_count * number_of_results_per_page)
-            page_remaining_count = 0
-            for result in href_results:
-                if page_remaining_count >= pages_remaining:
-                    break
-                url_list.append('https://www.medrxiv.org' + result['href'] + '.full-text')
-                page_remaining_count += 1
+                return None, -1
 
         url_dict[calculate_mid_date(start_date, end_date, '%d-%m-%Y')] = url_list
         start_date = add_date_by_days(end_date, 1, '%d-%m-%Y')
 
     write_to_file(url_dict, os.path.join(path, search_term + '_url_dict_csv.csv'), ['Date', 'URL'])
-    return url_dict
+    return url_dict, 1
