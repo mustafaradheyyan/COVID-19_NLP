@@ -12,7 +12,7 @@ def nlu_authenticator(api_key, service_url):
 
 def generate_nlp_output(nlp_input, type_of_query, user_api_key, user_service_url, number_of_keywords):
     nlu = nlu_authenticator(user_api_key, user_service_url)
-    if type_of_query[1:] == 'url':
+    if type_of_query == 'url':
         return generate_nlp_output_from_url_dict(nlp_input, nlu, number_of_keywords)
     elif type_of_query == 'text':
         return generate_nlp_output_from_text_dict(nlp_input, nlu, number_of_keywords)
