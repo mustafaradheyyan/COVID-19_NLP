@@ -84,14 +84,17 @@ def find_keyword_files(file_name):
     file_list = []
     for file in glob.glob(file_name):
         file_list.append(file)
-    return file_list  
+    return file_list   
     
 def turn_keywords_into_graphs(keyword):
     update_stop_words_with_keyword_permutations(keyword)
     file_list = find_keyword_files(os.path.join(path, '*_nlp_keywords.csv'))
-    for file in file_list:
-        keyword_dict = create_dictionary_object(open_read_csv_file(file))
-        plot_histogram_top_non_stopwords(file, keyword_dict, keyword)
+    if file_list:
+        for file in file_list:
+            keyword_dict = create_dictionary_object(open_read_csv_file(file))
+            plot_histogram_top_non_stopwords(file, keyword_dict, keyword)
+    else:
+        return -1
     
 def main():
     keyword = 'COVID-19'
