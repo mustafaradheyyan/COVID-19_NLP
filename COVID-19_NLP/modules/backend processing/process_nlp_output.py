@@ -45,12 +45,19 @@ def calculate_sentiment(nlp_data):
     sentiment_score = 0.0
     sentiment_count = 0
     for pub_data in nlp_data:
-        for row in pub_data:
-            positions=[x for x in range(len(row.split()))if row.split()[x]=='{\'score\':']
+        if type(pub_data) != np.ndarray:
+            positions=[x for x in range(len(pub_data.split()))if pub_data.split()[x]=='{\'score\':']
             if positions:
                 for position in positions:
-                    sentiment_score += is_number(row.split()[position + 1])
+                    sentiment_score += is_number(pub_data.split()[position + 1])
                     sentiment_count += 1
+        else:
+            for row in pub_data:
+                positions=[x for x in range(len(row.split()))if row.split()[x]=='{\'score\':']
+                if positions:
+                    for position in positions:
+                        sentiment_score += is_number(row.split()[position + 1])
+                        sentiment_count += 1
     if sentiment_count:
         return sentiment_score / sentiment_count
     else: return 0
@@ -58,10 +65,15 @@ def calculate_sentiment(nlp_data):
 def calculate_keywords(nlp_data):
     keywords = []
     for pub_data in nlp_data:
-        for row in pub_data:
-            position = row.find('{\'text\':')
+        if type(pub_data) != np.ndarray:
+            position = pub_data.find('{\'text\':')
             if position >= 0:
-                keywords.append(row[position+10:][:-1])
+                keywords.append(pub_data[position+10:][:-1])
+        else:
+            for row in pub_data:
+                position = row.find('{\'text\':')
+                if position >= 0:
+                    keywords.append(row[position+10:][:-1])
     return keywords
 
 def sort_nlp_output(nlp_file_names, nlp_type):
@@ -73,7 +85,7 @@ def sort_nlp_output(nlp_file_names, nlp_type):
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning, append=1)
             if nlp_type[1:] == 'url':
-                nlp_data = np.loadtxt(file,dtype=str,delimiter=',',skiprows=1,usecols=(3,7,17))
+                nlp_data = np.loadtxt(file,dtype=str,delimiter=',',skiprows=1,usecols=(3,7,17,18))
             elif nlp_type == 'text':
                 nlp_data = np.loadtxt(file,dtype=str,delimiter=',',skiprows=1,usecols=(3,6))
         os.remove(file)
@@ -81,9 +93,9 @@ def sort_nlp_output(nlp_file_names, nlp_type):
         keyword_dictionary[date] = calculate_keywords(nlp_data)
     return keyword_dictionary, sentiment_dictionary
 
-def get_nlp_keywords_and_sentiment_to_file(nlp_dictionary, nlp_type):
+def get_nlp_keywords_and_sentiment_to_file(nlp_dictionary, nlp_type, user_api_key, user_service_url):
     keywords_path, sentiments_path = initiate_path()
-    nlp_file_names = nlp.generate_nlp_output(nlp_dictionary, nlp_type[-4:])
+    nlp_file_names = nlp.generate_nlp_output(nlp_dictionary, nlp_type[-4:], user_api_key, user_service_url)
     keyword_dic, sentiment_dic = sort_nlp_output(nlp_file_names, nlp_type[-4:])
     write_to_file(keyword_dic, os.path.join(keywords_path, nlp_type[:-5] + '_nlp_keywords.csv'),\
                                                                           ['Date', 'Keywords'])

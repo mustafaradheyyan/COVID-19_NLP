@@ -54,13 +54,16 @@ def get_top_keywords_per_date_and_frequency(text_dict, keyword):
     stop = set(stopwords.words('english'))
     stop.update(new_stop_words)
     for date, text in text_dict.items():
-        new = " ".join(text).split()
+        if type(text) is not str:
+            new = " ".join(text).split()
+        else:
+            new = text.split()
         most = Counter(new).most_common()
         for word,count in most[:len(stop)+1]:
             if (word not in stop and word[0] != "@"):
                 x.append(count)
                 y.append(word + '\n' + date)
-                break;
+                break
     return x, y
 
 def customize_keyword_graph(keyword_graph, file_name, keyword):
@@ -75,6 +78,7 @@ def plot_histogram_top_non_stopwords(file_name, text_dict, keyword):
     x, y = get_top_keywords_per_date_and_frequency(text_dict, keyword)
     keyword_graph = sns.barplot(x = y, y = x)
     customize_keyword_graph(keyword_graph, file_name, keyword)
+    plt.close('all')
     
 def find_keyword_files(file_name):
     file_list = []
@@ -82,7 +86,7 @@ def find_keyword_files(file_name):
         file_list.append(file)
     return file_list  
     
-def turn_keywords_into_graph(keyword):
+def turn_keywords_into_graphs(keyword):
     update_stop_words_with_keyword_permutations(keyword)
     file_list = find_keyword_files(os.path.join(path, '*_nlp_keywords.csv'))
     for file in file_list:
@@ -91,7 +95,7 @@ def turn_keywords_into_graph(keyword):
     
 def main():
     keyword = 'COVID-19'
-    turn_keywords_into_graph(keyword)
+    turn_keywords_into_graphs(keyword)
         
 if __name__ == '__main__':
     main()
