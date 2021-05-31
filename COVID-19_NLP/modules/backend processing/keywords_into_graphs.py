@@ -67,7 +67,7 @@ def get_top_keywords_per_date_and_frequency(text_dict, keyword):
     return x, y
 
 def customize_keyword_graph(keyword_graph, file_name, keyword):
-    keyword_graph.set_title(keyword.title() + ' ' + file_name[len(path)+1:-len('_nlp_keywords.csv')]\
+    keyword_graph.set_title(keyword.title() + ' ' + file_name[len(path)+1+len(keyword)+1:-len('_nlp_keywords.csv')]\
                              .replace('_', ' ').title() + ' Keyword Frequency over Time')
     keyword_graph.set_xlabel("Keyword\nDate", fontsize = 20)
     keyword_graph.set_ylabel("Frequency")

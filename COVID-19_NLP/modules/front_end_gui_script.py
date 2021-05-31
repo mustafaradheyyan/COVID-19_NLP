@@ -36,7 +36,7 @@ def start_processing(entries):
     # The 'health_pub' part of the string signifies the NLP file name and the ".url" is the NLP query type
     print("Success\n\nProcessing health pub urls with NLP", flush = True)
     text.insert(tk.END, "Success!\n\nProcessing health pub urls with NLP\n")
-    get_nlp_keywords_and_sentiment_to_file(dict_of_urls, 'health_pub..url', user_api_key, user_service_url)
+    get_nlp_keywords_and_sentiment_to_file(search_term, dict_of_urls, 'health_pub..url', user_api_key, user_service_url)
     
     # Getting English tweets from Twitter based on dates and search term
     print("Success\n\nScraping Twitter tweets", flush = True)
@@ -50,7 +50,7 @@ def start_processing(entries):
     # The 'tweet' part of the string signifies the NLP file name and the "text" is the NLP query type
     print("Success\n\nProcessing tweets with NLP", flush = True)
     text.insert(tk.END, "Success!\n\nProcessing tweets with NLP\n")
-    get_nlp_keywords_and_sentiment_to_file(dict_of_text, 'tweet.text', user_api_key, user_service_url)
+    get_nlp_keywords_and_sentiment_to_file(search_term, dict_of_text, 'tweet.text', user_api_key, user_service_url)
 
     # Turning (both) NLP keyword csv files into histogram graphs with the top keyword per month
     text.insert(tk.END, "Success!\n\nProcessing NLP keyword csv files into graphs\n")
