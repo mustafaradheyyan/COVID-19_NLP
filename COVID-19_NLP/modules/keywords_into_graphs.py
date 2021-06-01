@@ -4,11 +4,11 @@ import glob
 import itertools
 import seaborn as sns
 import matplotlib.pyplot as plt
-from read_csv_and_get_dict import *
+from modules.read_csv_and_get_dict import *
 from nltk.corpus import stopwords
 from collections import  Counter
 
-path = 'nlp_keywords'
+nlp_keyword_path = 'nlp_keywords'
 
 new_stop_words = ['COVID-19', 'coronavirus', 'Coronavirus', 'SARS-CoV-2', 'new', 'New',
                   'News', 'news', 'AP', 'number', 'numbers', 'cases', 'Cases', 'first', 'Update',
@@ -68,7 +68,7 @@ def get_top_keywords_per_date_and_frequency(text_dict, keyword):
     return x, y
 
 def customize_keyword_graph(keyword_graph, file_name, keyword):
-    keyword_graph.set_title(keyword.title() + ' ' + file_name[len(path)+1+len(keyword)+1+22:-len('_nlp_keywords.csv')]\
+    keyword_graph.set_title(keyword.title() + ' ' + file_name[len(nlp_keyword_path)+1+len(keyword)+1+22:-len('_nlp_keywords.csv')]\
                              .replace('_', ' ').title() + ' Keyword Frequency over Time')
     keyword_graph.set_xlabel("Keyword\nDate", fontsize = 20)
     keyword_graph.set_ylabel("Frequency")
@@ -88,11 +88,11 @@ def find_keyword_files(file_name):
     file_list = []
     for file in glob.glob(file_name):
         file_list.append(file)
-    return file_list   
+    return file_list
     
 def turn_keywords_into_graphs(keyword, start_date, end_date):
     update_stop_words_with_keyword_permutations(keyword)
-    file_list = find_keyword_files(os.path.join(path, keyword + '_' + start_date + '_'\
+    file_list = find_keyword_files(os.path.join(nlp_keyword_path, keyword + '_' + start_date + '_'\
                                                    + end_date + '_' + '*_nlp_keywords.csv'))
     if file_list:
         for file in file_list:

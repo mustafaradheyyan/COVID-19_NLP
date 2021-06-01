@@ -1,12 +1,13 @@
-import sys
-sys.path.insert(0, 'backend processing')
-from health_pub_scraper import *
-from tweet_to_dict import *
-from generate_nlp_output import *
-from process_nlp_output import *
-import sentiments_into_graph as sgr
-import keywords_into_graphs as kgr
+import modules.read_csv_and_get_dict
+import modules.health_pub_scraper as hps
+import modules.tweet_to_dict as t2d
+import modules.generate_nlp_output
+import modules.process_nlp_output as pnlp
+import modules.sentiments_into_graph as sgr
 import tkinter as tk
+import modules.keywords_into_graphs as kgr
+from datetime import datetime
+import modules.tweet_scraper as ts
 
 fields = 'Search Term', 'Start Date (mm-dd-yyyy)', 'End Date  (mm-dd-yyyy)',\
 'Number of tweets per month', 'Number of health pubs per month','Number of keywords per nlp analysis',\
@@ -15,8 +16,9 @@ text_list = 'COVID-19', '01-12-2020', '05-24-2021', 30, 5, 2, 'ydoMxOX7J7I788-6T
 'https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/69dbbfc3-ca34-4da9-986b-c5f0473ce007'
 
 def error_check_keywords(number_of_keywords):
-    if number_of_keywords == 0:
-        text.insert(tk.END, 'Error! Number of keywords must be greater than 0\n')
+    if number_of_keywords <= 0:
+        text.insert(tk.END, 'Error! Number of keywords must be greater than 0\n\n')
+        print('\nError! Number of keywords must be greater than 0\n', flush = True)
         return -1
     else:
         return 0
@@ -25,12 +27,15 @@ def error_check_api_key_url(user_api_key, user_service_url):
     if user_api_key == '':
         if user_service_url == '':
             text.insert(tk.END, 'Error! Blank API and URL key.\n\n')
+            print('\nError! Blank API and URL key.\n', flush = True)
             return -1
         else:
             text.insert(tk.END, 'Error! Blank API key.\n\n')
+            print('\nError! Blank API key.\n', flush = True)
             return -1
     elif user_service_url == '':
         text.insert(tk.END, 'Error! Blank URL key.\n\n')
+        print('\nError! Blank URL key.\n', flush = True)
         return -1
     else:
         return 0
@@ -38,6 +43,7 @@ def error_check_api_key_url(user_api_key, user_service_url):
 def error_check_date(start_date, end_date):
     if datetime.strptime(end_date, '%m-%d-%Y') < datetime.strptime(start_date, '%m-%d-%Y'):
         text.insert(tk.END, 'Error! End date is before start date.\n\n')
+        print('\nError! End date is before start date.\n', flush = True)
         return -1
     else:
         return 0
@@ -79,7 +85,7 @@ def web_scraping_for_keyword(search_term, start_date, end_date, pubs_per_month, 
     # Reading health pub csv file and creating dictionary object
     print("\nScraping medRxiv " + search_term + " publication urls", flush = True)
     text.insert(tk.END, "Scraping medRxiv " + search_term + ' publication urls\n')
-    dict_of_urls, error_code = health_pub_scraper(pubs_per_month, start_date, end_date, search_term)
+    dict_of_urls, error_code = hps.health_pub_scraper(pubs_per_month, start_date, end_date, search_term)
     if error_code == -1:
         print('Failure! 0 Results for term "' + search_term + '" and posted between "' +\
                start_date + '" and "' + end_date + '"\n\nSearch will now terminate!', flush = True)
@@ -90,11 +96,11 @@ def web_scraping_for_keyword(search_term, start_date, end_date, pubs_per_month, 
     else:
         print("Success\n\nScraping Twitter tweets", flush = True)
         text.insert(tk.END, "Success!\n\nScraping Twitter tweets\n")
-    tweet_scraper(tweets_per_month, start_date, end_date, search_term)
+    ts.tweet_scraper(tweets_per_month, start_date, end_date, search_term)
     # Reading tweets csv files and creating a dictionary object from it
     print("Success\n\nConverting tweet csv files into a text dictionary", flush = True)
     text.insert(tk.END, "Success!\n\nConverting tweet csv files into a text dictionary\n")
-    dict_of_text = get_tweet_csv_data_into_text_dict(start_date, end_date, search_term)
+    dict_of_text = t2d.get_tweet_csv_data_into_text_dict(start_date, end_date, search_term)
     return dict_of_urls, dict_of_text, 1
 
 def nlp_analysis_of_keyword_content(search_term, start_date, end_date, dict_of_urls, dict_of_text, user_api_key, user_service_url, number_of_keywords):
@@ -103,13 +109,13 @@ def nlp_analysis_of_keyword_content(search_term, start_date, end_date, dict_of_u
     print("Success\n\nProcessing health pub urls with NLP", flush = True)
     text.insert(tk.END, "Success!\n\nProcessing health pub urls with NLP\n")
     file_name_prefix = search_term + '_' + start_date + '_' + end_date + '_health_pub'
-    get_nlp_keywords_and_sentiment_to_file(file_name_prefix, dict_of_urls, 'url', user_api_key, user_service_url, number_of_keywords)
+    pnlp.get_nlp_keywords_and_sentiment_to_file(file_name_prefix, dict_of_urls, 'url', user_api_key, user_service_url, number_of_keywords)
     # Processing dictionary object with NLP to return a keywords and sentiments file
     # The 'tweet' part of the string signifies the NLP file name and the "text" is the NLP query type
     print("Success\n\nProcessing tweets with NLP", flush = True)
     text.insert(tk.END, "Success!\n\nProcessing tweets with NLP\n")
     file_name_prefix = search_term + '_' + start_date + '_' + end_date + '_tweet'
-    get_nlp_keywords_and_sentiment_to_file(file_name_prefix, dict_of_text, 'text', user_api_key, user_service_url, number_of_keywords)
+    pnlp.get_nlp_keywords_and_sentiment_to_file(file_name_prefix, dict_of_text, 'text', user_api_key, user_service_url, number_of_keywords)
     print("Success!", flush = True)
     text.insert(tk.END, "Success!\n\n")
 

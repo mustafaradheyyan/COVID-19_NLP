@@ -2,15 +2,16 @@ import os
 import re
 import requests
 import math
-from tweet_scraper import *
-from process_nlp_output import write_dict_to_file
+from datetime import datetime
+import modules.tweet_scraper as ts
+from modules.process_nlp_output import write_dict_to_file
 from bs4 import BeautifulSoup
 
-def initiate_path():
+def initiate_health_pub_path_get_file_name(search_term, begin_date, final_date):
     path = 'health_pub'
     if not os.path.exists(path):
         os.mkdir(path)
-    return path
+    return (os.path.join(path, search_term + '_' + begin_date + '_' + final_date + '_url_dict.csv'))
 
 def calculate_mid_date(start_date, end_date, date_format):
     start_date = datetime.strptime(start_date, date_format)
@@ -29,13 +30,15 @@ def get_url_href_results(URL):
     return soup.find_all('a', href=re.compile('/content/10.1101/*'))
 
 def health_pub_scraper(number_of_pubs_per_month, start_date, end_date, search_term):
+    first_date = start_date
+    last_date = end_date
     start_date, end_date = convert_dates_to_dmy(start_date, end_date)
     additional_pages = '?page='
     number_of_results_per_page = 10
-    months = calculate_number_of_months(start_date, end_date, '%d-%m-%Y')
-    final_date = end_date
-    url_dict = {}
+    months = ts.calculate_number_of_months(start_date, end_date, '%d-%m-%Y')
 
+    url_dict = {}
+    final_date = end_date
     URL = (f'https://www.medrxiv.org/search/{search_term}%20limit_from%3A{start_date}%20limit_to%3A{end_date}')
     href_results = get_url_href_results(URL)
     if href_results:
@@ -43,7 +46,7 @@ def health_pub_scraper(number_of_pubs_per_month, start_date, end_date, search_te
             # Creating list to append tweet data to
             url_list = []
             if not months == month_count:
-                end_date = calculate_end_date(start_date, end_date, '%d-%m-%Y')
+                end_date = ts.calculate_end_date(start_date, end_date, '%d-%m-%Y')
             else:
                 end_date = final_date
                 
@@ -67,9 +70,9 @@ def health_pub_scraper(number_of_pubs_per_month, start_date, end_date, search_te
                 
 
             url_dict[calculate_mid_date(start_date, end_date, '%d-%m-%Y')] = url_list
-            start_date = add_date_by_days(end_date, 1, '%d-%m-%Y')
+            start_date = ts.add_date_by_days(end_date, 1, '%d-%m-%Y')
     else:
         return None, -1
-    path = initiate_path()
-    write_dict_to_file(url_dict, os.path.join(path, search_term + '_url_dict_csv.csv'), ['Date', 'URL'])
+    file_name = initiate_health_pub_path_get_file_name(search_term, first_date, last_date)
+    write_dict_to_file(url_dict, file_name, ['Date', 'URL'])
     return url_dict, 1
